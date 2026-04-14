@@ -380,6 +380,23 @@ button {
     opacity: 0.65;
 }
 
+.mobile-notice {
+    display: none;
+    margin-top: 12px;
+    padding: 8px 12px;
+    border: 1px dashed #ff8d00;
+    color: #ff8d00;
+    font-size: 12px;
+    line-height: 1.4;
+    background: #1f1203;
+}
+
+@media (max-width: 720px) {
+    .mobile-notice {
+        display: block;
+    }
+}
+
 .repo-link {
     color: #ff8d00;
     text-decoration: none;
@@ -389,4 +406,38 @@ button {
 
 .repo-link:hover {
     background: #211200;
+}
+
+@media (max-width: 720px) {
+    body {
+        margin: 8px;
+    }
+
+    .system {
+        padding: 8px;
+    }
+
+    .input-container {
+        grid-template-columns: auto 1fr;
+        row-gap: 8px;
+    }
+
+    .reset-btn {
+        grid-column: 1 / -1;
+        justify-self: start;
+        padding: 6px 18px;
+    }
+
+    .notice {
+        font-size: 11px;
+    }
+
+    .modal {
+        width: 95vw;
+        max-height: 85vh;
+    }
+
+    .modal-row {
+        grid-template-columns: 1fr;
+    }
 }

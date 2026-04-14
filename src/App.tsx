@@ -243,6 +243,11 @@ export default function App() {
         disabledReason={inputDisabledReason}
       />
 
+      <p className="mobile-notice">
+        For the full NERV terminal experience, MAGI is best viewed on a desktop
+        browser.
+      </p>
+
       <p className="notice">
         API keys are stored only in this browser&apos;s localStorage. Do not use
         this app on shared computers.{' '}
