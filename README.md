@@ -64,10 +64,49 @@ Chinese providers work. OpenAI, DeepSeek, and some others may refuse
 browser-direct requests — in those cases, route through OpenRouter, APIYI, or
 a local proxy.
 
-For **LM Studio** (or any local OpenAI-compatible server) make sure CORS is
-enabled in the server settings. The app is served over `http://` in dev, so
-`http://localhost:1234/v1` works; a production HTTPS deployment cannot reach
-`http://localhost` due to mixed-content rules.
+### Running against a local LLM (LM Studio / Ollama / llama.cpp)
+
+**This only works in the dev build, not in the deployed HTTPS version.**
+
+In dev (`pnpm dev` → `http://localhost:5173/`), the app page is served over
+`http://`, which is allowed to talk to another `http://localhost` port. Make
+sure CORS is enabled in your local server's settings and point the Custom
+provider at, for example, `http://localhost:1234/v1`.
+
+A production HTTPS deployment (e.g. Cloudflare Pages, `https://*.pages.dev`)
+**cannot** reach `http://localhost:1234` from the user's browser. This is not
+a mis-configuration — it's a hard browser rule with two layers working
+together:
+
+1. **Private Network Access (PNA / CORS-RFC1918).** Chromium blocks public
+   HTTPS pages from sending CORS preflights to private-network endpoints
+   (localhost, `192.168.*`, `10.*`) unless the server sends an
+   `Access-Control-Allow-Private-Network: true` header. Local LLM servers
+   don't implement this, so the preflight fails before the real request is
+   even attempted. DevTools labels this as a "CORS error", but the root cause
+   is PNA.
+2. **Mixed content.** Independently, HTTPS pages are generally forbidden from
+   making plaintext HTTP requests. Browsers make an exception for `localhost`
+   as a "potentially trustworthy" origin, so mixed content alone wouldn't
+   block it — but combined with PNA above, the request is dead on arrival.
+
+There is no fix for this that keeps the app as a pure static PWA served over
+HTTPS. The intended workflow is:
+
+- **For local-model experimentation:** run `pnpm dev` and use the HTTP dev
+  server. LM Studio / Ollama / llama.cpp work out of the box.
+- **For the deployed HTTPS version:** configure each wise man with a cloud
+  provider (OpenRouter is the most CORS-friendly default).
+
+localStorage is scoped per origin, so your dev-server config (pointing at
+localhost) and your pages.dev config (pointing at cloud providers) are kept
+independently and do not interfere with each other.
+
+If you really want the deployed HTTPS version to reach a local LLM server,
+the options involve infrastructure changes outside this app: wrapping the
+local server in HTTPS via a reverse proxy like Caddy (auto-generated cert),
+or exposing it through a tunnel like `cloudflared tunnel`. These are
+intentionally not built into MAGI.
 
 ## How it works
 
